@@ -15,12 +15,12 @@ function HeroSection() {
               Join thousands of attendees at exciting events happening near you.
               From technology to music festivals, we have it all!
             </p>
-            <a
-              href="#events"
+            <Link
+              to=""
               className="inline-block bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors"
             >
               Explore Events
-            </a>
+            </Link>
           </div>
 
           {/* Right Side (Image) */}

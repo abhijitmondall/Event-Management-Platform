@@ -1,20 +1,33 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useAuthContext } from "../../context/AuthProvider";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const { login, authUser } = useAuthContext();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Perform login action
     // handleLogin(formData);
+    await login(formData.email, formData.password);
+    navigate("/", { replace: true });
   };
+
+  if (authUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient">
+        <h1 className="text-5xl"> You are already logged in!</h1>
+      </div>
+    );
+  }
 
   return (
     <section className="">

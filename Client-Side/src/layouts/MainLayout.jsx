@@ -5,7 +5,7 @@ import Footer from "../UI/Footer/Footer";
 
 function MainLayout() {
   const location = useLocation();
-  console.log(location);
+
   // const pathName = location.pathname;
 
   useEffect(() => {

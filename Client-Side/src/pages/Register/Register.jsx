@@ -1,46 +1,102 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useAuthContext } from "../../context/AuthProvider";
+
+const initialState = {
+  name: "",
+  email: "",
+  gender: "",
+  password: "",
+  confirmPassword: "",
+  photo: null,
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "name":
+      return { ...state, name: action.payload };
+    case "email":
+      return { ...state, email: action.payload };
+    case "password":
+      return { ...state, password: action.payload };
+    case "confirmPassword":
+      return { ...state, confirmPassword: action.payload };
+    case "gender":
+      return { ...state, gender: action.payload };
+    case "photo":
+      return { ...state, photo: action.payload };
+    case "reset":
+      return initialState;
+    default:
+      return state;
+  }
+};
 
 function Register() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    gender: "",
-    password: "",
-    confirmPassword: "",
-  });
-
+  const [formData, dispatch] = useReducer(reducer, initialState);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { signup, authUser } = useAuthContext();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    dispatch({ type: name, payload: value });
   };
 
-  const validateForm = () => {
-    let newErrors = {};
-
-    if (!formData.name.trim()) newErrors.name = "Full name is required.";
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    if (!formData.gender) newErrors.gender = "Please select a gender.";
-    if (!formData.password.trim()) newErrors.password = "Password is required.";
-    if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters.";
-    if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Passwords do not match.";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      // TODO
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      dispatch({ type: "photo", payload: file });
     }
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Simple form validation
+    const validationErrors = {};
+    if (!formData.name) validationErrors.name = "Name is required";
+    if (!formData.email) validationErrors.email = "Email is required";
+    if (!formData.gender) validationErrors.gender = "Gender is required";
+    if (!formData.password) validationErrors.password = "Password is required";
+    if (formData.password !== formData.confirmPassword) {
+      validationErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) return;
+
+    // Prepare form data to send to backend
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("gender", formData.gender);
+    formDataToSend.append("password", formData.password);
+    formDataToSend.append("confirmPassword", formData.confirmPassword);
+    if (formData.photo) {
+      formDataToSend.append("photo", formData.photo);
+    }
+
+    try {
+      await signup(formDataToSend, dispatch);
+      navigate("/", { replace: true });
+    } catch (error) {
+      setErrors(error.res?.data?.message || "Something went wrong");
+      console.log(error);
+    }
+  };
+
+  if (authUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient">
+        <h1 className="text-5xl"> You are already logged in!</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center min-h-[90vh] bg-gray-100 px-4">
@@ -94,9 +150,9 @@ function Register() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
             >
               <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
             {errors.gender && (
               <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
@@ -150,6 +206,23 @@ function Register() {
               <p className="text-red-500 text-sm mt-1">
                 {errors.confirmPassword}
               </p>
+            )}
+          </div>
+
+          {/* Profile Photo Upload Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm mb-2">
+              Profile Photo
+            </label>
+            <input
+              type="file"
+              name="photo"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+            {errors.photo && (
+              <p className="text-red-500 text-sm mt-1">{errors.photo}</p>
             )}
           </div>
 

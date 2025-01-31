@@ -1,6 +1,6 @@
-import React from "react";
+import { Link } from "react-router";
 
-function Footer(props) {
+function Footer() {
   return (
     <footer className="bg-gray-800 text-white py-6">
       <div className="container">
@@ -13,18 +13,18 @@ function Footer(props) {
 
           {/* Right Section */}
           <div className="mt-4 sm:mt-0 flex space-x-6">
-            <a href="#" className="hover:text-blue-400 transition-colors">
+            <Link to="#" className="hover:text-blue-400 transition-colors">
               About Us
-            </a>
-            <a href="#" className="hover:text-blue-400 transition-colors">
+            </Link>
+            <Link to="#" className="hover:text-blue-400 transition-colors">
               Contact
-            </a>
-            <a href="#" className="hover:text-blue-400 transition-colors">
+            </Link>
+            <Link to="#" className="hover:text-blue-400 transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-blue-400 transition-colors">
+            </Link>
+            <Link to="#" className="hover:text-blue-400 transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>
