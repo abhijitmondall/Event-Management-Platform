@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+@layer {
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+  /************************************/
+  /*             VARIABLES            */
+  /************************************/
+
+  :root {
+    /* // COLORS */
+    --color-primary: #282c34;
+    --color-secondary: #81c5d8;
+    --color-tertiary: #4d2c5e;
+
+    --color-white: #fff;
+
+    --color-grey-light-1: #faf9f9;
+    --color-grey-light-2: #f4f2f2;
+    --color-grey-light-3: #f0eeee;
+    --color-grey-light-4: #ccc;
+
+    --color-grey-dark: rgba(17, 17, 17, 0.6);
+    --color-grey-dark-1: #333;
+    --color-grey-dark-2: #777;
+    --color-grey-dark-3: #999;
+
+    /* // GRADIENTS */
+    --bg-gradient: linear-gradient(
+      90deg,
+      rgba(126, 144, 254, 0.1) 0%,
+      rgba(152, 115, 255, 0.1) 100%
+    );
+
+    /* // Shadow */
+    --shadow-dark: 0 1rem 2rem rgba(0, 0, 0, 0.3);
+
+    /* // FONT SIZES */
+    --text-h1: 3.2rem;
+    --text-h2: 2.8rem;
+    --text-h3: 2.4rem;
+    --text-h4: 2.2rem;
+    --text-h5: 2rem;
+    --text-h6: 1.8rem;
+    --text-body: 1rem;
+
+    --text-1x: 1.4rem;
+    --text-2x: 1.8rem;
+    --text-3x: 2.6rem;
+    --text-4x: 3.2rem;
+    --text-5x: 5.2rem;
+
+    /* // BORDER RADIUS */
+    --radius: 0.8rem;
+    --radius-1x: 2.5rem;
+
+    /* MEDIA QUERIES */
+    --medium: 62.5em;
+    --small: 43.75em;
+
+    @media (max-width: 62.5em) {
+      /* FONT SIZES */
+      --text-h1: 2.4rem;
+      --text-h2: 2rem;
+      --text-h3: 1.8rem;
+      --text-h4: 1.8rem;
+      --text-h5: 1.6rem;
+      --text-h6: 1.6rem;
+    }
+  }
+
+  body {
+    font-family: "Poppins", serif;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.6;
+    font-size: var(--text-body);
+    color: var(--color-primary);
+    /* background-color: #d5d9e6; */
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow-x: hidden;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 81.25rem;
+    padding: 0 3.2rem;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 56em) {
+    .container {
+      padding: 0 1.4rem;
+    }
+  }
+
+  .shadow {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px;
+  }
+
+  .bg-gradient {
+    background: linear-gradient(
+      90deg,
+      rgba(126, 144, 254, 0.1) 0%,
+      rgba(152, 115, 255, 0.1) 100%
+    );
+  }
+
+  .disabled {
+    display: block;
+    background-color: #f0eeee !important;
+    color: #ccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+    padding: 0.4rem 1rem;
+    margin: 0 auto;
+    border-radius: 0.8rem;
+    border: 1px solid #999 !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .slider .swiper-button-prev {
+    position: absolute;
+    top: 31px;
+    left: 93%;
+    z-index: 99999;
+  }
+
+  .slider .swiper-button-next {
+    position: absolute;
+    top: 14%;
+  }
+}
+
+.slider .swiper-button-prev:after,
+.slider .swiper-button-next:after {
+  font-size: 26px !important;
+  font-weight: bold !important;
+}
+
+::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background-image: linear-gradient(
+    to right bottom,
+    var(--color-secondary),
+    var(--color-tertiary)
+  );
+  border-radius: 10rem;
+}
