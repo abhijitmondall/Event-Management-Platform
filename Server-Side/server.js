@@ -11,6 +11,7 @@ process.on("uncaughtException", (err) => {
 
 const mongoose = require("mongoose");
 const app = require("./app");
+const { setupWebSocket } = require("./socketIo");
 
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
@@ -22,12 +23,15 @@ mongoose.connect(DB, {}).then((con) => {
   console.log("DB connection established");
 });
 
-const port = process.env.PORT || 2000;
+const PORT = process.env.PORT || 2000;
 
 // Server
-const server = app.listen(port, () => {
-  console.log(`listening on port ${port}...`);
+const expServer = app.listen(PORT, () => {
+  console.log("listening on port", PORT);
 });
+
+// Socket.IO connection
+setupWebSocket(expServer);
 
 // Unhandled Rejection
 process.on("unhandledRejection", (err) => {

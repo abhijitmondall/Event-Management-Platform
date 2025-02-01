@@ -2,6 +2,7 @@ import { useReducer, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
 import { useAuthContext } from "../../context/AuthProvider";
+import Swal from "sweetalert2";
 
 const initialState = {
   name: "",
@@ -84,9 +85,20 @@ function Register() {
     try {
       await signup(formDataToSend, dispatch);
       navigate("/", { replace: true });
-    } catch (error) {
-      setErrors(error.res?.data?.message || "Something went wrong");
-      console.log(error);
+
+      Swal.fire({
+        icon: "success",
+        title: "Registration Success!",
+        text: "You have successfully registered!",
+      });
+    } catch (err) {
+      console.log(err);
+
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed!",
+        text: err.message,
+      });
     }
   };
 
@@ -100,7 +112,7 @@ function Register() {
 
   return (
     <div className="flex justify-center items-center min-h-[90vh] bg-gray-100 px-4">
-      <div className="bg-white p-6 md:p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="bg-white p-6 md:p-8 rounded-lg shadow-md w-full max-w-lg">
         <h2 className="text-2xl font-semibold text-center text-gray-800">
           Create an Account
         </h2>

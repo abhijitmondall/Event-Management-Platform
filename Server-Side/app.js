@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 
 const userRouter = require("./routes/userRoutes");
+const eventRouter = require("./routes/eventRoutes");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
@@ -24,6 +25,9 @@ app.use(cookieParser());
 
 // User Route
 app.use("/api/v1/users", userRouter);
+
+// Event Route
+app.use("/api/v1/events", eventRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on the server!`, 404));

@@ -8,7 +8,7 @@ class ApiFeatures {
     const queryObj = { ...this.queryString };
     const excludedQueries = ["page", "sort", "limit", "fields", "text"];
     excludedQueries.forEach((el) => delete queryObj[el]);
-    console.log(queryObj);
+
     let queryStr = JSON.stringify(queryObj);
 
     queryStr = queryStr.replace(
@@ -64,7 +64,7 @@ class ApiFeatures {
 
       console.log(queryObj.text.search);
       this.query = this.query.find({
-        collegeName: { $regex: new RegExp(queryObj.text.search, "i") },
+        name: { $regex: new RegExp(queryObj.text.search, "i") },
       });
     }
     return this;

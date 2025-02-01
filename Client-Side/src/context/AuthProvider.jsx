@@ -13,6 +13,8 @@ function AuthProvider({ children }) {
   );
   const [isLoading, setIsLoading] = useState(false);
 
+  const token = JSON.parse(localStorage.getItem("user"))?.token;
+
   const login = async (email, password) => {
     try {
       setIsLoading(true);
@@ -27,10 +29,11 @@ function AuthProvider({ children }) {
       });
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok && data?.status !== "success") throw new Error(data.message);
 
       localStorage.setItem("user", JSON.stringify(data));
       setAuthUser(data?.data?.user);
+      return data?.data?.user;
     } catch (err) {
       console.error(err);
       throw new Error(err.message);
@@ -70,6 +73,7 @@ function AuthProvider({ children }) {
 
   const authInfo = {
     authUser,
+    token,
     setAuthUser,
     login,
     signup,

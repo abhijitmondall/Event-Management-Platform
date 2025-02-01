@@ -1,9 +1,8 @@
-const multer = require("multer");
-
 const ApiFeatures = require("../utils/apiFeatures");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const User = require("./../models/userModel");
+const multerUpload = require("../utils/multerUpload");
 
 const getUserData = (req) => {
   return {
@@ -14,33 +13,8 @@ const getUserData = (req) => {
   };
 };
 
-const multerStorage = multer.diskStorage({
-  destination: "public/img",
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      `user-${Math.floor(
-        1000000 + Math.random() * 9000000
-      ).toString()}-${Date.now()}.jpeg`
-    );
-  },
-});
-
-const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only image files are allowed!"), false);
-  }
-};
-
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
-});
-
 // Upload Photo
-exports.uploadUserPhoto = upload.single("photo");
+exports.uploadUserPhoto = multerUpload("Img", "photo");
 
 // Get User
 exports.getUser = catchAsync(async (req, res, next) => {

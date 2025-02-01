@@ -2,11 +2,13 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
 import { useAuthContext } from "../../context/AuthProvider";
+import Swal from "sweetalert2";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const { login, authUser } = useAuthContext();
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -15,10 +17,23 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Perform login action
-    // handleLogin(formData);
-    await login(formData.email, formData.password);
-    navigate("/", { replace: true });
+    try {
+      const user = await login(formData.email, formData.password);
+
+      Swal.fire({
+        icon: "success",
+        title: `Welcome ${user?.name}!`,
+        text: "You have successfully logged in!",
+      });
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        icon: "error",
+        title: "Login failed!",
+        text: err.message,
+      });
+    }
   };
 
   if (authUser) {

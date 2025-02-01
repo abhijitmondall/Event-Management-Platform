@@ -1,71 +1,143 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
+import { BASE_URL } from "../../helpers/settings";
+import { useAuthContext } from "../../context/AuthProvider";
+import Swal from "sweetalert2";
+
+const initialState = {
+  name: "",
+  summary: "",
+  description: "",
+  date: "",
+  time: "",
+  location: "",
+  maxAttendees: "",
+  category: "",
+  eventImage: null,
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "name":
+      return { ...state, name: action.payload };
+    case "summary":
+      return { ...state, summary: action.payload };
+    case "description":
+      return { ...state, description: action.payload };
+    case "date":
+      return { ...state, date: action.payload };
+    case "time":
+      return { ...state, time: action.payload };
+    case "location":
+      return { ...state, location: action.payload };
+    case "maxAttendees":
+      return { ...state, maxAttendees: action.payload };
+    case "category":
+      return { ...state, category: action.payload };
+    case "eventImage":
+      return { ...state, eventImage: action.payload };
+    case "reset":
+      return initialState;
+    default:
+      return state;
+  }
+};
 
 function CreateEvent() {
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-    maxAttendees: "",
-    eventImage: null,
-  });
-
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { token, authUser } = useAuthContext();
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    dispatch({ type: name, payload: value });
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, eventImage: e.target.files[0] });
+    dispatch({ type: "eventImage", payload: e.target.files[0] });
   };
 
   const validateForm = () => {
     let newErrors = {};
-
-    if (!formData.name.trim()) newErrors.name = "Event name is required.";
-    if (!formData.description.trim())
+    if (!state.name.trim()) newErrors.name = "Event name is required.";
+    if (!state.summary.trim()) newErrors.summary = "Summary is required.";
+    if (!state.description.trim())
       newErrors.description = "Description is required.";
-    if (!formData.date) newErrors.date = "Please select a date.";
-    if (!formData.time) newErrors.time = "Please select a time.";
-    if (!formData.location.trim()) newErrors.location = "Location is required.";
-    if (!formData.maxAttendees || formData.maxAttendees <= 0)
+    if (!state.date) newErrors.date = "Please select a date.";
+    if (!state.time) newErrors.time = "Please select a time.";
+    if (!state.location.trim()) newErrors.location = "Location is required.";
+    if (!state.maxAttendees || state.maxAttendees <= 0)
       newErrors.maxAttendees = "Max attendees must be greater than 0.";
-    if (!formData.eventImage)
+    if (!state.category) newErrors.category = "Please select a category.";
+    if (!state.eventImage)
       newErrors.eventImage = "Please upload an event image.";
-
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
-      // TODO
-      console.log(formData);
-      setFormData({
-        name: "",
-        description: "",
-        date: "",
-        time: "",
-        location: "",
-        maxAttendees: "",
-        eventImage: null,
-      });
+      const formData = new FormData();
+      formData.append("name", state.name);
+      formData.append("summary", state.summary);
+      formData.append("description", state.description);
+      formData.append("date", state.date);
+      formData.append("time", state.time);
+      formData.append("location", state.location);
+      formData.append("maxAttendees", state.maxAttendees);
+      formData.append("eventCategory", state.category);
+
+      if (state.eventImage) {
+        formData.append("eventImage", state.eventImage);
+      }
+
+      formData.append(
+        "author",
+        JSON.stringify({ name: authUser.name, email: authUser.email })
+      );
+
+      try {
+        setLoading(true);
+        const res = await fetch(`${BASE_URL}/api/v1/events`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error("Failed to create event!");
+
+        Swal.fire({
+          icon: "success",
+          title: "Event Created!",
+          text: "Your event has been created successfully.",
+        });
+
+        dispatch({ type: "reset" });
+      } catch (err) {
+        console.error(err);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Create Event",
+          text: "There was an issue creating your event. Please try again later.",
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[90vh] bg-gray-100 px-4">
-      <div className="bg-white p-6 md:p-8 rounded-lg shadow-md w-full max-w-lg">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 py-[60px]">
+      <div className="bg-white p-6 md:p-8 rounded-lg shadow-md w-full md:max-w-[36%] max-w-full">
         <h2 className="text-2xl font-semibold text-center text-gray-800">
           Create a New Event
         </h2>
-
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {/* Event Name */}
           <div>
             <label className="block text-gray-700 text-sm mb-1">
               Event Name
@@ -73,7 +145,7 @@ function CreateEvent() {
             <input
               type="text"
               name="name"
-              value={formData.name}
+              value={state.name}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               placeholder="Enter event name"
@@ -83,14 +155,28 @@ function CreateEvent() {
             )}
           </div>
 
-          {/* Description */}
+          <div>
+            <label className="block text-gray-700 text-sm mb-1">Summary</label>
+            <input
+              type="text"
+              name="summary"
+              value={state.summary}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              placeholder="Enter event summary"
+            />
+            {errors.summary && (
+              <p className="text-red-500 text-sm">{errors.summary}</p>
+            )}
+          </div>
+
           <div>
             <label className="block text-gray-700 text-sm mb-1">
               Description
             </label>
             <textarea
               name="description"
-              value={formData.description}
+              value={state.description}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               placeholder="Enter event description"
@@ -101,14 +187,13 @@ function CreateEvent() {
             )}
           </div>
 
-          {/* Date & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 text-sm mb-1">Date</label>
               <input
                 type="date"
                 name="date"
-                value={formData.date}
+                value={state.date}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               />
@@ -122,7 +207,7 @@ function CreateEvent() {
               <input
                 type="time"
                 name="time"
-                value={formData.time}
+                value={state.time}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               />
@@ -132,13 +217,12 @@ function CreateEvent() {
             </div>
           </div>
 
-          {/* Location */}
           <div>
             <label className="block text-gray-700 text-sm mb-1">Location</label>
             <input
               type="text"
               name="location"
-              value={formData.location}
+              value={state.location}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               placeholder="Enter event location"
@@ -148,7 +232,6 @@ function CreateEvent() {
             )}
           </div>
 
-          {/* Max Attendees */}
           <div>
             <label className="block text-gray-700 text-sm mb-1">
               Max Attendees
@@ -156,7 +239,7 @@ function CreateEvent() {
             <input
               type="number"
               name="maxAttendees"
-              value={formData.maxAttendees}
+              value={state.maxAttendees}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               placeholder="Enter max attendees"
@@ -166,7 +249,28 @@ function CreateEvent() {
             )}
           </div>
 
-          {/* Upload Image */}
+          <div>
+            <label className="block text-gray-700 text-sm mb-1">Category</label>
+            <select
+              name="category"
+              value={state.category}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            >
+              <option value="">All Categories</option>
+              <option value="Technology">Technology</option>
+              <option value="Education">Education</option>
+              <option value="Music">Music</option>
+              <option value="Business">Business</option>
+              <option value="Workshop">Workshop</option>
+              <option value="Health">Health</option>
+              <option value="Marketing">Marketing</option>
+            </select>
+            {errors.category && (
+              <p className="text-red-500 text-sm">{errors.category}</p>
+            )}
+          </div>
+
           <div>
             <label className="block text-gray-700 text-sm mb-1">
               Event Image
@@ -182,10 +286,12 @@ function CreateEvent() {
             )}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
+            disabled={loading}
+            className={`w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer ${
+              loading && "disabled"
+            }`}
           >
             Create Event
           </button>
