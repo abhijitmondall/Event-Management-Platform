@@ -53,7 +53,9 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user || !(await user.comparePassword(password, user.password))) {
-    throw new Error("User not found. Incorrect email or password!");
+    return next(
+      new AppError("User not found. Incorrect email or password!", 403)
+    );
   }
 
   const token = signToken(user._id, res);
