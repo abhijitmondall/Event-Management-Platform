@@ -36,7 +36,6 @@ function Login() {
     }
   };
 
-  // Example in React.js
   const handleGuestLogin = async (e) => {
     e.preventDefault();
     try {
