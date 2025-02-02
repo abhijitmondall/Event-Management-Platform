@@ -132,8 +132,9 @@ function Events() {
   return (
     <section className="container">
       <div className="py-[90px]">
-        <h2 className="text-3xl font-bold mb-[30px] text-center">
-          Explore Events
+        <h2 className="text-[32px] font-bold mb-[50px]">
+          <span className="block">Trusted by</span> Thousands of Event
+          Organizers
         </h2>
 
         {/* Filters Section */}

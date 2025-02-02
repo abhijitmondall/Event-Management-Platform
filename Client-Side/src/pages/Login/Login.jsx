@@ -3,7 +3,6 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
 import { useAuthContext } from "../../context/AuthProvider";
 import Swal from "sweetalert2";
-import { BASE_URL } from "../../helpers/settings";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -134,7 +133,7 @@ function Login() {
           <div>
             <button
               onClick={handleGuestLogin}
-              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
+              className="w-full bg-blue-400 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
             >
               Login as Guest
             </button>
