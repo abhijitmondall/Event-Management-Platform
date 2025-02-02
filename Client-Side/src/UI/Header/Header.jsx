@@ -26,7 +26,7 @@ function Header() {
           className={`w-full md:w-auto ${isOpen ? "block" : "hidden"} md:block`}
         >
           <ul
-            className={`w-full flex items-center md:gap-[50px] gap-[20px] text-sm md:text-base font-medium text-white justify-center md:justify-end md:relative absolute md:top-0 top-[60px] left-0 bg-[#333] z-10 md:bg-transparent py-[20px] md:py-0 ${
+            className={`w-full flex items-center md:gap-[50px] gap-[20px] text-sm md:text-base font-medium text-white justify-center md:justify-end md:relative absolute md:top-0 top-[60px] left-0 bg-gray-800 z-10 md:bg-transparent py-[20px] md:py-0 ${
               isOpen ? "flex-col" : "flex-row"
             }`}
           >
@@ -71,7 +71,7 @@ function Header() {
                 </li>
 
                 <li>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col md:flex-row items-center gap-3">
                     <div className="flex gap-[6px] items-center">
                       <p className="text-[#81c5d8]">{authUser?.name}</p>
                       <img

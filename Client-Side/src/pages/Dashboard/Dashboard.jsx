@@ -1,12 +1,11 @@
 import { useState, useEffect, useReducer } from "react";
-import { FaCross, FaEdit, FaTrash } from "react-icons/fa";
+
 import { useAuthContext } from "../../context/AuthProvider";
 import { BASE_URL } from "../../helpers/settings";
 import EventCard from "../../UI/EventCard/EventCard";
 import EventForm from "../../UI/EventForm/EventForm";
 import { IoClose } from "react-icons/io5";
 import Swal from "sweetalert2";
-import { useSocketContext } from "../../context/SocketProvider";
 
 const initialState = {
   name: "",
@@ -48,16 +47,29 @@ const reducer = (state, action) => {
 };
 
 function Dashboard() {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { token, authUser } = useAuthContext();
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [state, dispatch] = useReducer(reducer, initialState);
-
   const [reFetch, setReFetch] = useState(false);
+
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
+  const filterByCategory = categoryFilter && `eventCategory=${categoryFilter}`;
+
+  let filterByDate = "";
+
+  const today = new Date().toISOString().split("T")[0];
+
+  if (dateFilter && dateFilter === "upcoming") {
+    filterByDate += `date[gte]=${today}`;
+  }
+  if (dateFilter && dateFilter === "past") {
+    filterByDate += `date[lte]=${today}`;
+  }
 
   // Open modal and set event to edit
   const handleEditEvent = (e, event) => {
@@ -88,14 +100,12 @@ function Dashboard() {
 
     if (confirmDelete.isConfirmed) {
       try {
-        const res = await fetch(`${BASE_URL}/api/v1/events/${eventId}`, {
+        await fetch(`${BASE_URL}/api/v1/events/${eventId}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        // if (!res.ok) throw new Error("Failed to delete event.");
 
         // Re-fetch events after deletion
         setReFetch((re) => !re);
@@ -108,7 +118,7 @@ function Dashboard() {
           showConfirmButton: false,
         });
       } catch (err) {
-        setError(err.message);
+        console.log(err);
         Swal.fire({
           title: "Error!",
           text: "Failed to delete event. Please try again later.",
@@ -192,33 +202,73 @@ function Dashboard() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/v1/events/userEvents`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const res = await fetch(
+          `${BASE_URL}/api/v1/events/userEvents?${filterByCategory}&${filterByDate}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!res.ok) throw new Error("Failed to fetch events.");
         const data = await res.json();
         setEvents(data?.data?.userEvents);
       } catch (err) {
-        setError(err.message);
+        // setError(err.message);
+        console.log(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [authUser._id, token, reFetch]);
+  }, [authUser._id, token, reFetch, filterByCategory, filterByDate]);
 
   return (
     <section className="container">
       <div className="py-[90px] relative min-h-[90vh]">
-        <h2 className="text-3xl font-bold mb-6 text-center">
+        <h2 className="text-3xl font-bold mb-[30px] text-center">
           My Events Dashboard
         </h2>
+
+        {/* Filters Section */}
+        <div className="flex justify-between mb-6">
+          {/* Category Filter */}
+          <div>
+            <label className="mr-2">Filter By Category:</label>
+            <select
+              className="p-2 border rounded-lg shadow-sm"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              <option value="Technology">Technology</option>
+              <option value="Education">Education</option>
+              <option value="Music">Music</option>
+              <option value="Business">Business</option>
+              <option value="Workshop">Workshop</option>
+              <option value="Health">Health</option>
+              <option value="Marketing">Marketing</option>
+            </select>
+          </div>
+
+          {/* Date Filter */}
+          <div>
+            <label className="mr-2">Filter By Date:</label>
+            <select
+              className="p-2 border rounded-lg shadow-sm"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+            >
+              <option value="">All Events</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="past">Past</option>
+            </select>
+          </div>
+        </div>
 
         {isModalOpen && selectedEvent && (
           <div className="fixed inset-0 flex items-center justify-center bg-gradient bg-opacity-50 backdrop-blur-sm z-50 animate-fadeIn">
@@ -253,7 +303,7 @@ function Dashboard() {
         />
 
         <h1 className="text-[26px] text-center font-bold">
-          {events.length === 0 && "You have not created any Event yet!"}
+          {events.length === 0 && "No Events Found!"}
         </h1>
       </div>
     </section>

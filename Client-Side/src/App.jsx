@@ -7,6 +7,7 @@ import Register from "./pages/Register/Register";
 import PrivateRoutes from "./routes/PrivateRoutes";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import EventDetails from "./pages/EventDetails/EventDetails";
+import Error from "./pages/Error/Error";
 
 function App() {
   return (
@@ -40,7 +41,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
-      {/* <Route path="*" element={<Error />} /> */}
+      <Route path="*" element={<Error />} />
     </Routes>
   );
 }

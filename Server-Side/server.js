@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
+const morgan = require("morgan");
 
 // Unhandled Exception
 process.on("uncaughtException", (err) => {

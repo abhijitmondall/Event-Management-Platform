@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { Link } from "react-router";
+
 import { BASE_URL } from "../../helpers/settings";
 import { useAuthContext } from "../../context/AuthProvider";
 import { useSocketContext } from "../../context/SocketProvider";
@@ -121,7 +120,9 @@ function Events() {
   return (
     <section className="container">
       <div className="py-[90px]">
-        <h2 className="text-3xl font-bold mb-6 text-center">Event Dashboard</h2>
+        <h2 className="text-3xl font-bold mb-[30px] text-center">
+          Explore Events
+        </h2>
 
         {/* Filters Section */}
         <div className="flex justify-between mb-6">
