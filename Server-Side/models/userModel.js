@@ -57,7 +57,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
-  this.confirmPassword = undefined; // remove confirmPassword field from the document before saving it to the database.
+  this.confirmPassword = undefined;
   next();
 });
 

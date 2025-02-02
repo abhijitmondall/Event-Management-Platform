@@ -46,6 +46,7 @@ The Event Management Platform (EventHub) is a full-stack application designed to
 - Clone the repository: git clone <repo_url>
 - cd Server-Side
 - Install dependencies: npm install
+- Start the backend server: npm start
 
 #### Set up environment variables in a .env file:
 - PORT=<your_port>
@@ -58,7 +59,6 @@ The Event Management Platform (EventHub) is a full-stack application designed to
 - JWT_SECRET=<your_jwt_secret>
 - JWT_EXPIRES_IN=<jwt_expiry_duration>
 - JWT_COOKIE_EXPIRES_IN=<cookie_expiry_duration>
-- Start the backend server: npm start
 
 
 ### Frontend Setup:
@@ -88,6 +88,12 @@ The Event Management Platform (EventHub) is a full-stack application designed to
 ## Deployment Links:
 - Frontend: Live URL - https://eventhub-abhijit.netlify.app/
 - Backend: Live Base URL - https://eventhub-abhijit.onrender.com
+
+## Test User Credentials:
+### Login:
+- Email: abhijeetmondal5@gmail.com
+- Password: test1234
+- Login: Use the credentials above to login as a User.
 
 ## Contact
 For any queries or support, reach out to abhijeetmondal5@gmail.com
