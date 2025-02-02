@@ -2,14 +2,49 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { BASE_URL } from "../../helpers/settings";
 import { useAuthContext } from "../../context/AuthProvider";
+import { useSocketContext } from "../../context/SocketProvider";
 
 function EventDetails() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadAttendance, setLoadAttendance] = useState(false);
   const [error, setError] = useState(null);
+  const { socket } = useSocketContext();
 
   const { token, authUser } = useAuthContext();
   const { id } = useParams();
+
+  const handleAttendEvent = async (e, id) => {
+    e.preventDefault();
+
+    try {
+      setLoadAttendance(true);
+      const res = await fetch(`${BASE_URL}/api/v1/events/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          attendees: event?.attendees + 1,
+          bookedSeats: {
+            ...event.bookedSeats,
+            [authUser._id]: true,
+          },
+          author: JSON.stringify({
+            name: authUser.name,
+            email: authUser.email,
+          }),
+        }),
+      });
+
+      if (!res.ok) throw new Error(res.message);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadAttendance(false);
+    }
+  };
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -35,6 +70,19 @@ function EventDetails() {
     fetchEventDetails();
   }, [id, token]);
 
+  // Real Time Event Attendance Update With Socket.io
+  useEffect(() => {
+    if (socket) {
+      socket.on("eventUpdated", (updatedEvent) => {
+        setEvent((prevEvent) => ({ ...prevEvent, ...updatedEvent._doc }));
+      });
+
+      return () => {
+        socket.off("eventUpdated");
+      };
+    }
+  }, [socket]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-[90px] min-h-screen">
@@ -45,7 +93,7 @@ function EventDetails() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-screen">
         <p className="text-xl font-bold text-red-500">Error: {error}</p>
       </div>
     );
@@ -53,7 +101,7 @@ function EventDetails() {
 
   return (
     <section className="container">
-      <div className="min-h-screen">
+      <div className="min-h-screen pb-[90px]">
         {/* Event Header */}
         <div className="relative">
           <img
@@ -91,6 +139,11 @@ function EventDetails() {
               </div>
 
               <div>
+                <h3 className="text-xl font-semibold">Attendees</h3>
+                <p className="text-gray-700">{event?.attendees}</p>
+              </div>
+
+              <div>
                 <h3 className="text-xl font-semibold">Max Attendees</h3>
                 <p className="text-gray-700">{event?.maxAttendees}</p>
               </div>
@@ -98,8 +151,20 @@ function EventDetails() {
 
             {/* RSVP Button */}
             <div className="mt-6 text-center">
-              <button className="bg-blue-600 text-white py-2 px-6 rounded-lg text-xl hover:bg-blue-700 transition duration-300">
-                RSVP Now
+              <button
+                onClick={(e) => {
+                  handleAttendEvent(e, event?._id);
+                }}
+                disabled={event?.bookedSeats?.[authUser?._id] || loadAttendance}
+                className={`mt-4 w-full md:w-[20%] p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mb-2 cursor-pointer ${
+                  event?.bookedSeats?.[authUser?._id] && "disabled"
+                }`}
+              >
+                {`${
+                  event?.bookedSeats?.[authUser?._id]
+                    ? "Seat Booked"
+                    : "RSVP Now"
+                }`}
               </button>
             </div>
           </div>
