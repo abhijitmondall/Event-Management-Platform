@@ -151,8 +151,8 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
   const event = await Event.findByIdAndDelete(req.params.id);
 
   if (
-    event?.author?.email !== req?.user?.email ||
-    req?.user?.role !== "Admin"
+    event?.author?.email !== req?.user?.email &&
+    (req?.user?.role !== "Admin" || req?.user?.role !== "User")
   ) {
     return next(
       new AppError(`You don not have permission to perform this action!`, 403)
