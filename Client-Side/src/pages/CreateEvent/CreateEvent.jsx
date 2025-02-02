@@ -2,6 +2,7 @@ import { useReducer, useState } from "react";
 import { BASE_URL } from "../../helpers/settings";
 import { useAuthContext } from "../../context/AuthProvider";
 import Swal from "sweetalert2";
+import EventForm from "../../UI/EventForm/EventForm";
 
 const initialState = {
   name: "",
@@ -11,7 +12,7 @@ const initialState = {
   time: "",
   location: "",
   maxAttendees: "",
-  category: "",
+  eventCategory: "",
   eventImage: null,
 };
 
@@ -31,8 +32,8 @@ const reducer = (state, action) => {
       return { ...state, location: action.payload };
     case "maxAttendees":
       return { ...state, maxAttendees: action.payload };
-    case "category":
-      return { ...state, category: action.payload };
+    case "eventCategory":
+      return { ...state, eventCategory: action.payload };
     case "eventImage":
       return { ...state, eventImage: action.payload };
     case "reset":
@@ -45,38 +46,9 @@ const reducer = (state, action) => {
 function CreateEvent() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { token, authUser } = useAuthContext();
-  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    dispatch({ type: name, payload: value });
-  };
-
-  const handleFileChange = (e) => {
-    dispatch({ type: "eventImage", payload: e.target.files[0] });
-  };
-
-  const validateForm = () => {
-    let newErrors = {};
-    if (!state.name.trim()) newErrors.name = "Event name is required.";
-    if (!state.summary.trim()) newErrors.summary = "Summary is required.";
-    if (!state.description.trim())
-      newErrors.description = "Description is required.";
-    if (!state.date) newErrors.date = "Please select a date.";
-    if (!state.time) newErrors.time = "Please select a time.";
-    if (!state.location.trim()) newErrors.location = "Location is required.";
-    if (!state.maxAttendees || state.maxAttendees <= 0)
-      newErrors.maxAttendees = "Max attendees must be greater than 0.";
-    if (!state.category) newErrors.category = "Please select a category.";
-    if (!state.eventImage)
-      newErrors.eventImage = "Please upload an event image.";
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, validateForm) => {
     e.preventDefault();
 
     if (validateForm()) {
@@ -88,7 +60,7 @@ function CreateEvent() {
       formData.append("time", state.time);
       formData.append("location", state.location);
       formData.append("maxAttendees", state.maxAttendees);
-      formData.append("eventCategory", state.category);
+      formData.append("eventCategory", state.eventCategory);
 
       if (state.eventImage) {
         formData.append("eventImage", state.eventImage);
@@ -137,7 +109,7 @@ function CreateEvent() {
         <h2 className="text-2xl font-semibold text-center text-gray-800">
           Create a New Event
         </h2>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        {/* <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label className="block text-gray-700 text-sm mb-1">
               Event Name
@@ -295,7 +267,15 @@ function CreateEvent() {
           >
             Create Event
           </button>
-        </form>
+        </form> */}
+        <EventForm
+          onFormSubmit={handleSubmit}
+          state={state}
+          loading={loading}
+          dispatch={dispatch}
+        >
+          Create Event
+        </EventForm>
       </div>
     </div>
   );

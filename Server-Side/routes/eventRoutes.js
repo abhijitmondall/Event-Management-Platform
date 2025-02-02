@@ -4,6 +4,10 @@ const authController = require("./../controllers/authController");
 const router = express.Router();
 
 router
+  .route("/userEvents")
+  .get(authController.protected, eventController.getUserEvents);
+
+router
   .route("/")
   .get(eventController.getAllEvents)
   .post(
@@ -19,6 +23,7 @@ router
   .patch(
     authController.protected,
     authController.restrictTo("User", "Admin"),
+    eventController.uploadEventImage,
     eventController.updateEvent
   )
   .delete(
@@ -26,19 +31,5 @@ router
     authController.restrictTo("User", "Admin"),
     eventController.deleteEvent
   );
-
-// router
-//   .route("/:email")
-//   .get(authController.protected, eventController.getUserEvents)
-//   .patch(
-//     authController.protected,
-//     authController.restrictTo("User"),
-//     eventController.updateEvent
-//   )
-//   .delete(
-//     authController.protected,
-//     authController.restrictTo("User"),
-//     eventController.deleteEvent
-//   );
 
 module.exports = router;

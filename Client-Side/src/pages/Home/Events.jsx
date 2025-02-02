@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { BASE_URL } from "../../helpers/settings";
 import { useAuthContext } from "../../context/AuthProvider";
 import { useSocketContext } from "../../context/SocketProvider";
+import EventCard from "../../UI/EventCard/EventCard";
 
 function Events() {
   const { token, authUser } = useAuthContext();
@@ -13,6 +14,7 @@ function Events() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadAttendance, setLoadAttendance] = useState(false);
   const [error, setError] = useState("");
 
   const filterByCategory = categoryFilter && `eventCategory=${categoryFilter}`;
@@ -30,6 +32,7 @@ function Events() {
 
   const handleAttendEvent = async (event) => {
     try {
+      setLoadAttendance(true);
       const res = await fetch(`${BASE_URL}/api/v1/events/${event._id}`, {
         method: "PATCH",
         headers: {
@@ -42,11 +45,18 @@ function Events() {
             ...event.bookedSeats,
             [authUser._id]: true,
           },
+          author: JSON.stringify({
+            name: authUser.name,
+            email: authUser.email,
+          }),
         }),
       });
+
       if (!res.ok) throw new Error(res.message);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoadAttendance(false);
     }
   };
 
@@ -80,7 +90,7 @@ function Events() {
         setEvents((prevEvents) =>
           prevEvents.map((event) =>
             event._id === updatedEvent.eventId
-              ? { ...event, ...updatedEvent }
+              ? { ...event, ...updatedEvent?._doc }
               : event
           )
         );
@@ -150,71 +160,12 @@ function Events() {
         </div>
 
         {/* Event Cards Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[26px]">
-          {events?.map((event) => (
-            <div
-              key={event._id}
-              className="relative bg-gradient rounded-lg border border-gray-300 shadow-md hover:shadow-xl transition-all duration-300 ease-in-out p-4 flex flex-col justify-between group"
-            >
-              {/* Edit & Delete Icons (Hidden by default, shown on hover) */}
-              <div className="absolute bg-white shadow-md p-[10px] rounded-[3px] top-[20px] right-[20px] flex flex-col gap-[10px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button
-                  onClick={() => {}}
-                  className="text-green-600 hover:text-green-800 cursor-pointer"
-                >
-                  <FaEdit size={18} />
-                </button>
-                <button
-                  onClick={() => {}}
-                  className="text-red-600 hover:text-red-800 cursor-pointer"
-                >
-                  <FaTrash size={18} />
-                </button>
-              </div>
-
-              {/* Event Image */}
-              <img
-                src={event.eventImage}
-                alt={event.name}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-
-              <h4 className="text-xl font-semibold text-gray-800">
-                {event.name}
-              </h4>
-              <p className="mt-2 text-gray-600 text-sm">{event.summary}</p>
-              <p className="mt-2 text-gray-500 text-xs">
-                {new Date(event.date).toLocaleDateString()}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-gray-700">
-                {event.attendees} Attendees
-              </p>
-
-              {/* Attend Event Button */}
-              <button
-                onClick={() => handleAttendEvent(event)}
-                disabled={event?.bookedSeats?.[authUser?._id]}
-                className={`mt-4 w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mb-2 cursor-pointer ${
-                  event?.bookedSeats?.[authUser?._id] && "disabled"
-                }`}
-              >
-                {`${
-                  event?.bookedSeats?.[authUser?._id]
-                    ? "Seat Booked"
-                    : "Attend Event"
-                }`}
-              </button>
-
-              {/* View Details Button */}
-              <Link
-                to={`/event/${event.id}`}
-                className="block text-center text-blue-500 hover:text-blue-600 font-semibold"
-              >
-                View Details
-              </Link>
-            </div>
-          ))}
-        </div>
+        <EventCard
+          events={events}
+          onHandleSubmit={handleAttendEvent}
+          loadAttendance={loadAttendance}
+          showBtns={true}
+        />
       </div>
     </section>
   );
