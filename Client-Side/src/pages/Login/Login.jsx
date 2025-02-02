@@ -3,11 +3,12 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
 import { useAuthContext } from "../../context/AuthProvider";
 import Swal from "sweetalert2";
+import { BASE_URL } from "../../helpers/settings";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const { login, authUser } = useAuthContext();
+  const { login, guestLogin, authUser } = useAuthContext();
 
   const navigate = useNavigate();
 
@@ -19,6 +20,28 @@ function Login() {
     e.preventDefault();
     try {
       const user = await login(formData.email, formData.password);
+
+      Swal.fire({
+        icon: "success",
+        title: `Welcome ${user?.name}!`,
+        text: "You have successfully logged in!",
+      });
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        icon: "error",
+        title: "Login failed!",
+        text: err.message,
+      });
+    }
+  };
+
+  // Example in React.js
+  const handleGuestLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const user = await guestLogin();
 
       Swal.fire({
         icon: "success",
@@ -107,6 +130,15 @@ function Login() {
               Register
             </Link>
           </p>
+          <p className="p-[16px] text-center">OR</p>
+          <div>
+            <button
+              onClick={handleGuestLogin}
+              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors cursor-pointer"
+            >
+              Login as Guest
+            </button>
+          </div>
         </div>
       </div>
     </section>

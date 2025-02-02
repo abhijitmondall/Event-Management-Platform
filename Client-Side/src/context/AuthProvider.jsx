@@ -42,6 +42,28 @@ function AuthProvider({ children }) {
     }
   };
 
+  const guestLogin = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/users/guest-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+
+      if (!res.ok && data?.status !== "success") throw new Error(data.message);
+
+      localStorage.setItem("user", JSON.stringify(data));
+      setAuthUser(data?.data?.user);
+      console.log(data);
+      return data?.data?.user;
+    } catch (err) {
+      console.error(err);
+      throw new Error(err.message);
+    }
+  };
+
   const signup = async (state, dispatch) => {
     try {
       setIsLoading(true);
@@ -76,6 +98,7 @@ function AuthProvider({ children }) {
     token,
     setAuthUser,
     login,
+    guestLogin,
     signup,
     isLoading,
     logout,

@@ -202,6 +202,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        setLoading(true);
         const res = await fetch(
           `${BASE_URL}/api/v1/events/userEvents?${filterByCategory}&${filterByDate}`,
           {
@@ -295,12 +296,18 @@ function Dashboard() {
           </div>
         )}
 
-        <EventCard
-          onHandleEdit={handleEditEvent}
-          onHandleDelete={handleDeleteEvent}
-          events={events}
-          showBtns={false}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center p-[90px]">
+            <p className="text-xl font-bold text-blue-500">Loading...</p>
+          </div>
+        ) : (
+          <EventCard
+            onHandleEdit={handleEditEvent}
+            onHandleDelete={handleDeleteEvent}
+            events={events}
+            showBtns={false}
+          />
+        )}
 
         <h1 className="text-[26px] text-center font-bold">
           {events.length === 0 && "No Events Found!"}

@@ -4,6 +4,8 @@ import { BASE_URL } from "../../helpers/settings";
 import { useAuthContext } from "../../context/AuthProvider";
 import { useSocketContext } from "../../context/SocketProvider";
 import EventCard from "../../UI/EventCard/EventCard";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router";
 
 function Events() {
   const { token, authUser } = useAuthContext();
@@ -15,6 +17,8 @@ function Events() {
   const [loading, setLoading] = useState(false);
   const [loadAttendance, setLoadAttendance] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   const filterByCategory = categoryFilter && `eventCategory=${categoryFilter}`;
 
@@ -30,6 +34,15 @@ function Events() {
   }
 
   const handleAttendEvent = async (event) => {
+    if (!authUser) {
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "You need to be logged in to attend an event",
+      });
+      navigate("/login", { replace: true });
+      return;
+    }
     try {
       setLoadAttendance(true);
       const res = await fetch(`${BASE_URL}/api/v1/events/${event._id}`, {
@@ -51,9 +64,16 @@ function Events() {
         }),
       });
 
-      if (!res.ok) throw new Error(res.message);
+      const data = await res.json();
+
+      if (!res.ok && data.status !== "success") throw new Error(data.message);
     } catch (err) {
       console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed!",
+        text: err.message,
+      });
     } finally {
       setLoadAttendance(false);
     }
@@ -100,14 +120,6 @@ function Events() {
       };
     }
   }, [socket]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-[90px] min-h-screen">
-        <p className="text-xl font-bold text-blue-500">Loading...</p>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -161,12 +173,18 @@ function Events() {
         </div>
 
         {/* Event Cards Section */}
-        <EventCard
-          events={events}
-          onHandleSubmit={handleAttendEvent}
-          loadAttendance={loadAttendance}
-          showBtns={true}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center p-[90px]">
+            <p className="text-xl font-bold text-blue-500">Loading...</p>
+          </div>
+        ) : (
+          <EventCard
+            events={events}
+            onHandleSubmit={handleAttendEvent}
+            loadAttendance={loadAttendance}
+            showBtns={true}
+          />
+        )}
       </div>
     </section>
   );

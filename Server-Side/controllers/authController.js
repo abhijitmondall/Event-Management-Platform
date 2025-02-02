@@ -68,6 +68,36 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
+// Guest login
+exports.guestLogin = catchAsync(async (req, res, next) => {
+  // Check if a guest user already exists
+  let guest = await User.findOne({ role: "Guest" });
+
+  if (!guest) {
+    // Create a guest user if it doesn't exist
+    guest = await User.create({
+      name: "Guest",
+      email: "guest@domain.com",
+      password: "guestPassword123",
+      confirmPassword: "guestPassword123",
+      gender: "Other",
+      role: "Guest",
+    });
+  }
+
+  // Generate a JWT token for the guest user
+  const token = signToken(guest._id, res);
+
+  // Send the response with the JWT token
+  res.status(200).json({
+    status: "success",
+    token,
+    data: {
+      user: guest,
+    },
+  });
+});
+
 // Protected Middleware
 exports.protected = catchAsync(async (req, res, next) => {
   // 1. Getting token and check if it's exists

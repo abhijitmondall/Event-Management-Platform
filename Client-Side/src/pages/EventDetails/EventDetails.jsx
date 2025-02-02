@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { BASE_URL } from "../../helpers/settings";
 import { useAuthContext } from "../../context/AuthProvider";
 import { useSocketContext } from "../../context/SocketProvider";
+import Swal from "sweetalert2";
 
 function EventDetails() {
   const [event, setEvent] = useState(null);
@@ -10,12 +11,22 @@ function EventDetails() {
   const [loadAttendance, setLoadAttendance] = useState(false);
   const [error, setError] = useState(null);
   const { socket } = useSocketContext();
+  const navigate = useNavigate();
 
   const { token, authUser } = useAuthContext();
   const { id } = useParams();
 
   const handleAttendEvent = async (e, id) => {
     e.preventDefault();
+    if (!authUser) {
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "You need to be logged in to attend an event",
+      });
+      navigate("/login", { replace: true });
+      return;
+    }
 
     try {
       setLoadAttendance(true);
@@ -38,9 +49,16 @@ function EventDetails() {
         }),
       });
 
-      if (!res.ok) throw new Error(res.message);
+      const data = await res.json();
+
+      if (!res.ok && data.status !== "success") throw new Error(data.message);
     } catch (err) {
       console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed!",
+        text: err.message,
+      });
     } finally {
       setLoadAttendance(false);
     }

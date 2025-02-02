@@ -81,7 +81,8 @@ function CreateEvent() {
           body: formData,
         });
 
-        if (!res.ok) throw new Error("Failed to create event!");
+        const data = await res.json();
+        if (!res.ok && data.status !== "success") throw new Error(data.message);
 
         Swal.fire({
           icon: "success",
@@ -94,8 +95,8 @@ function CreateEvent() {
         console.error(err);
         Swal.fire({
           icon: "error",
-          title: "Failed to Create Event",
-          text: "There was an issue creating your event. Please try again later.",
+          title: "Failed to Create Event!",
+          text: err.message,
         });
       } finally {
         setLoading(false);
