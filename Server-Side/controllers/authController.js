@@ -26,6 +26,11 @@ const signToken = (id, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   let body = req.body;
 
+  const emailExists = await User.findOne({ email: body.email });
+  if (emailExists) {
+    return next(new AppError("Email already exists!", 400));
+  }
+
   if (req.file) {
     const filename = await uploadFile(req.file.path);
     body.photo = filename;
